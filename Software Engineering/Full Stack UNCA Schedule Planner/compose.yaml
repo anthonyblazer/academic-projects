@@ -1,0 +1,40 @@
+services:
+  server:
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db_setup:
+        condition: service_completed_successfully
+    entrypoint: > 
+      bash -c "poetry run python populate.py && poetry run uvicorn server:app --host 0.0.0.0 --reload"
+
+  db:
+    image: postgres:15
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_PASSWORD=12345
+    healthcheck:
+      test: "psql -U postgres -h db -p 5432"
+      timeout: 5s
+      interval: 5s
+    volumes:
+      - ./backend:/script
+    working_dir: /script
+
+
+  db_setup:
+    image: postgres:15
+    env_file:
+      - .env
+    volumes:
+      - ./backend:/script
+    depends_on:
+      db:
+        condition: service_healthy
+    working_dir: /script
+    entrypoint: "bash ./db_setup.sh"

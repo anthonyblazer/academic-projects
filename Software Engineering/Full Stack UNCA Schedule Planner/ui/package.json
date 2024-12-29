@@ -1,0 +1,22 @@
+{
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "watch": "vite build --watch",
+    "format:check": "prettier --check \"**/*.{js,jsx}\"",
+    "format:fix": "prettier --write \"**/*.{js,jsx}\""
+  },
+  "dependencies": {
+    "antd": "",
+    "react": "",
+    "react-dom": ""
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "",
+    "autoprefixer": "",
+    "postcss": "",
+    "prettier": "^3.4.1",
+    "tailwindcss": "",
+    "vite": ""
+  }
+}
