@@ -1,4 +1,4 @@
-Which county had the most raw population growth from 2000 to 2019?
+Assignment: Which county had the most raw population growth from 2000 to 2019?
 
     According to the following script, the county with the most raw population growth is Maricopa County, Arizona with an increase of 1,413,265 people from 2000 to 2019. In 2000, the county's population was 3,072,149 and in 2019, the population was 4,485,414.
 
@@ -23,7 +23,7 @@ Which county had the most raw population growth from 2000 to 2019?
     limit 1; --limit down to the largest row at the top of the table.
 
 
-Which county grew the least or shrank the most from 2000 to 2019? (raw numbers)
+Assignment: Which county grew the least or shrank the most from 2000 to 2019? (raw numbers)
 
     Similar to the last script from above, by simply ordering the population growths in ascending, or smallest to greatest, order, we can see the top result is the county with the smallest increase. In this case, Wayne County, Michigan had a population decrease of 311,819 (-311,819). In 2000, the county had a population of 2,061,162 and in 2019, the county had a population of 1,749,341.
 
@@ -45,7 +45,7 @@ Which county grew the least or shrank the most from 2000 to 2019? (raw numbers)
     LIMIT 1;
 
 
-Which county represents median raw growth?
+Assignment: Which county represents median raw growth?
 
     The median population growth of 2000 was 430.5. For individual counties, two counties are tied for their closeness to the national median. These were Randolph County, West Virginia with 25 and Bourbon County, Kentucky with 2.5. Randolph County had a population growth of 433 and Bourbon County had a population growth of 428.
 
