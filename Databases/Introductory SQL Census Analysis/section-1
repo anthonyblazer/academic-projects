@@ -1,0 +1,75 @@
+Which county had the most raw population growth from 2000 to 2019?
+
+    According to the following script, the county with the most raw population growth is Maricopa County, Arizona with an increase of 1,413,265 people from 2000 to 2019. In 2000, the county's population was 3,072,149 and in 2019, the population was 4,485,414.
+
+    SELECT
+    c.state_name, -- Retrieve the state names from the 2019 info.
+    c.county_name, --Retrieve the county names from the 2019 info.
+    e.p0010001 AS population_2000, --Retrieve the total population from 2000's counties and change into a
+    --readable name.
+    c.pop_est_2019 AS population_2019, -- Retrieve the total population from 2019 and change the name
+    (c.pop_est_2019 - e.p0010001) AS population_growth -- Calculate population growth by subtracting
+    --the population of the selected 2000 county from the selected 2019 county.
+    FROM
+    us_counties_2000_question_3 e --assign alias to counties 2000
+    JOIN
+    us_counties_pop_est_2019 c--assign alias to counties 2019
+    ON
+    --Both of these are making sure that the results is connected to the correct county and state
+    e.state_fips = c.state_fips
+    AND e.county_fips = c.county_fips
+    ORDER BY --Order by largest change to smallest change.
+    population_growth desc
+    limit 1; --limit down to the largest row at the top of the table.
+
+
+Which county grew the least or shrank the most from 2000 to 2019? (raw numbers)
+
+    Similar to the last script from above, by simply ordering the population growths in ascending, or smallest to greatest, order, we can see the top result is the county with the smallest increase. In this case, Wayne County, Michigan had a population decrease of 311,819 (-311,819). In 2000, the county had a population of 2,061,162 and in 2019, the county had a population of 1,749,341.
+
+    SELECT
+    c.state_name,
+    c.county_name,
+    e.p0010001 AS population_2000,
+    c.pop_est_2019 AS population_2019,
+    (c.pop_est_2019 - e.p0010001) AS population_growth
+    FROM
+    us_counties_2000_question_3 e
+    JOIN
+    us_counties_pop_est_2019 c
+    ON
+    e.state_fips = c.state_fips
+    AND e.county_fips = c.county_fips
+    ORDER BY
+    population_growth asc;
+    LIMIT 1;
+
+
+Which county represents median raw growth?
+
+    The median population growth of 2000 was 430.5. For individual counties, two counties are tied for their closeness to the national median. These were Randolph County, West Virginia with 25 and Bourbon County, Kentucky with 2.5. Randolph County had a population growth of 433 and Bourbon County had a population growth of 428.
+
+    SELECT
+    e.state_fips,
+    e.county_fips,
+    e.county_name,
+    ABS((e.pop_est_2019::numeric - c.p0010001::numeric)-430.5) AS distance
+    -- Calculating the population growth of the county then figuring the distance from the median
+    FROM
+    us_counties_pop_est_2019 e
+    JOIN
+    us_counties_2000 c
+    ON
+    e.state_fips = c.state_fips AND e.county_fips = c.county_fips
+    WHERE
+    e.county_name NOT IN (
+    'Hoonah-Angoon', 'Skagway Municipality', 'Petersburg Borough',
+    'Prince of Wales-Hyder', 'Wrangell City and Borough',
+    'Broomfield County', 'Oglala Lakota County'
+    )
+    order by
+    distance asc; -- smallest value is closest to the median
+
+
+
+

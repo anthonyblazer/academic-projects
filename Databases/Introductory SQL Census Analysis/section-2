@@ -1,0 +1,259 @@
+Find the counties with the maximum, minimum, median, 1st and 3rd quartile population 
+density in 2000 and again in 2019.
+
+
+    Calculations explanation
+    Population density is calculated by: population / ACTUAL land area (not including water)
+    This calculation will give a better picture of each county's population dispersion of actual 
+    land since it is unlikely that people are residing in the water territories.
+
+    Creating Another Table
+    Note: I created a third table that's exactly like us_counties_2000 but instead I changed the name 
+    of Shannon County to its current name, Oglala Lakota County. This allowed it to be included in the 
+    calculations, unlike the ones you'll see in WHERE's.
+
+        --Created new table (same syntax as us_counties_2000) ; ommited for brevity
+        --New table: us_counties_pop_est_2019
+        UPDATE us_counties_2000_question_3
+        SET geo_name = 'Oglalala Lakota County, South Dakota'
+        WHERE state_fips = '46' and county_fips = '113';
+        UPDATE us_counties_2000_question_3
+        SET county_fips = '102'
+        WHERE state_fips = '46' and county_fips = '113';
+
+    ___________________________________________________________________
+
+
+    Maximum (largest) Population Density of 2019
+
+    The county with the highest population density in 2000 was New York County, New York, with a population
+    density of 0.0261915481.
+
+        SELECT
+        c.geo_name,
+        c.p0010001::numeric / e.area_land::numeric AS county_density
+        FROM us_counties_2000_question_3 c
+        JOIN us_counties_pop_est_2019 e
+        ON c.state_fips = e.state_fips AND c.county_fips = e.county_fips
+        WHERE e.county_name NOT IN ( --Not including these new counties found in 2019
+        'Hoonah-Angoon', 'Skagway Municipality', 'Petersburg Borough',
+        'Prince of Wales-Hyder', 'Wrangell City and Borough',
+        'Broomfield County'
+        )
+        order by
+        county_density desc; --Finding Maximum density.
+
+    ___________________________________________________________________
+
+
+    Minimum (Smallest) Population Density  in 2000
+    The county with the lowest population density was the Yukon-Kuyukuk Census Area, Alaska, 
+    with a county density of 0.0000000174.
+
+        SELECT
+        c.geo_name,
+        c.p0010001::numeric / e.area_land::numeric AS county_density
+        FROM us_counties_2000_question_3 c
+        JOIN us_counties_pop_est_2019 e
+        ON c.state_fips = e.state_fips AND c.county_fips = e.county_fips
+        WHERE e.county_name NOT IN (
+        'Hoonah-Angoon', 'Skagway Municipality', 'Petersburg Borough',
+        'Prince of Wales-Hyder', 'Wrangell City and Borough',
+        'Broomfield County'
+        )
+        order by
+        county_density asc; --Finding Maximum density.
+
+    __________________________________________________________________
+
+    Median Population Density 2000
+    The county closest to the national median density of 0.0000164705 was Penobscot County, Maine 
+    with a difference from the density of 0, resulting in the county's density being 0.0000164705.
+
+        -- Median population density in 2000
+        SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY (c.p0010001::numeric / e.area_land::numeric)) 
+        AS median_population_density
+        FROM us_counties_2000_question_3 c
+        JOIN us_counties_pop_est_2019 e
+        ON c.state_fips = e.state_fips AND c.county_fips = e.county_fips;
+        -- National population density: 0.0000164705
+        --Comparing counties' population densities and the national average
+        select c.geo_name,
+        ABS(((c.p0010001::numeric / e.area_land::numeric) - 0.0000164705)) as difference
+        -- Difference between the county's population density and the national average density
+        from us_counties_2000_question_3 c
+        JOIN us_counties_pop_est_2019 e --getting land info from 2019
+        ON c.state_fips = e.state_fips AND c.county_fips = e.county_fips
+        WHERE e.county_name NOT IN (
+        'Hoonah-Angoon', 'Skagway Municipality', 'Petersburg Borough',
+        'Prince of Wales-Hyder', 'Wrangell City and Borough',
+        'Broomfield County'
+        )
+
+
+    order by difference asc;
+
+    __________________________________________________________________
+
+    1st Quartile population Density 2000
+    The 1st quartile population density was 0.0000066252. The closest county came down to 0.00000000001, 
+    but Carroll County, Missouri was closest to the national 1st quartile density with a population density 
+    of 0.00000661789. 
+
+        SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY (c.p0010001::numeric / e.area_land::numeric)) 
+        AS median_population_density
+        FROM us_counties_2000_question_3 c
+        JOIN us_counties_pop_est_2019 e
+        ON c.state_fips = e.state_fips AND c.county_fips = e.county_fips;
+        -- National 1st quartile density: 0.0000066252
+
+
+        --Comparing counties' population densities and the national average
+        select
+        (c.p0010001::numeric / e.area_land::numeric) as county_density,
+        c.geo_name,
+        ABS(((c.p0010001::numeric / e.area_land::numeric) - 0.0000066252)) as difference
+        -- Difference between the county's population density and the national 1st quartile density
+        from us_counties_2000_question_3 c
+        JOIN us_counties_pop_est_2019 e --getting land info from 2019
+        ON c.state_fips = e.state_fips AND c.county_fips = e.county_fips
+        WHERE e.county_name NOT IN (
+        'Hoonah-Angoon', 'Skagway Municipality', 'Petersburg Borough',
+        'Prince of Wales-Hyder', 'Wrangell City and Borough',
+        'Broomfield County'
+        )
+        order by difference asc;
+
+    __________________________________________________________________
+    3rd Quartile Density 2000
+
+    The national density was 0.0000403601. However, two counties happened to have the same distance from
+    the 3rd quartile national density. These counties were Rogers County, Oklahoma with a population 
+    density of 0.00004036897, and Madison County, Mississippi with a population density of 0.00004035118. 
+    Both distances came out to 0.0000000089.
+
+
+        SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY (c.p0010001::numeric / e.area_land::numeric)) 
+        AS median_population_density
+        FROM us_counties_2000_question_3 c
+        JOIN us_counties_pop_est_2019 e
+        ON c.state_fips = e.state_fips AND c.county_fips = e.county_fips;
+        --National 3rd Quartile density: 0.0000403601
+
+
+
+        --Comparing counties' population densities and the national average
+        select
+        (c.p0010001::numeric / e.area_land::numeric) as county_density,
+        c.geo_name,
+        ABS(((c.p0010001::numeric / e.area_land::numeric) - 0.0000403600723222)) as difference
+        -- Difference between the county's population density and the national 3rd quartile density
+        from us_counties_2000_question_3 c
+        JOIN us_counties_pop_est_2019 e --getting land info from 2019
+        ON c.state_fips = e.state_fips AND c.county_fips = e.county_fips
+        WHERE e.county_name NOT IN (
+        'Hoonah-Angoon', 'Skagway Municipality', 'Petersburg Borough',
+        'Prince of Wales-Hyder', 'Wrangell City and Borough',
+        'Broomfield County'
+        )
+        order by difference asc;
+
+    ___________________________________________________________________
+
+
+    Maximum Population Density 2019
+
+    Similar to 2000, the county with the biggest (max) density is New York County, New York with a 
+    population density of 0.027750761.
+
+
+        SELECT
+        state_name,
+        county_name,
+        pop_est_2019,
+        area_land,
+        pop_est_2019::numeric / area_land::numeric AS county_density
+        from
+        us_counties_pop_est_2019
+        order by
+        county_density desc;
+
+    ___________________________________________________________________
+
+    Minimum Density 2019
+
+    Similar to the 2000 census, the county with the smallest population density is the Yukon-Koyukuk Census 
+    Area in Alaska with a density of 0.0000000139.
+
+        SELECT
+        state_name,
+        county_name,
+        pop_est_2019,
+        area_land,
+        pop_est_2019::numeric / area_land::numeric AS county_density
+        from
+        us_counties_pop_est_2019
+        order by
+        county_density asc; --Finding min density.
+
+    ___________________________________________________________________
+
+    Median Density 2019
+
+    The median population density The county with the median population density was Grant County, Wisconsin 
+    with a population density of 0.000017317184. 
+
+        SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY (pop_est_2019::numeric / area_land::numeric)) 
+        AS median_population_density
+        FROM us_counties_pop_est_2019;
+        --Median: 0.000017314568
+
+
+        select
+        (pop_est_2019::numeric / area_land::numeric) as county_density,
+        state_name,
+        county_name,
+        ABS(((pop_est_2019 ::numeric / area_land::numeric) - 0.000017314568)) as difference
+        -- Difference between the county's population density and the national 1st quartile density
+        from us_counties_pop_est_2019
+        order by difference asc;
+
+    __________________________________________________________________
+    1st Quartile Density 2019
+    The national 1st quartile population density value was 0.00000638, and the county closest to this value 
+    was Hughes County, Oklahoma with a population density of 0.0000063731, with a difference of 
+    0.00000000693 from the median
+
+        SELECT percentile_cont(0.25) WITHIN GROUP (ORDER BY (pop_est_2019::numeric / area_land::numeric)) 
+        AS median_population_density
+        FROM us_counties_pop_est_2019;
+        --1st Quartile: 0.00000638
+        select
+        (pop_est_2019::numeric / area_land::numeric) as county_density,
+        state_name,
+        county_name,
+        ABS(((pop_est_2019 ::numeric / area_land::numeric) - 0.0000063800091765)) as difference
+        -- Difference from the county's population density and the national 1st quartile density
+        from us_counties_pop_est_2019
+        order by difference asc;
+
+    _________________________________________________________________
+
+    3rd Quartile Population Density 2000
+
+    The 3rd quartile population density value was 0.0000457714013667, and the closest to this value is 
+    Huron County, Ohio. This county has a population density of 0.0000457719, with a difference of 
+    0.000000000483065.
+
+        SELECT percentile_cont(0.75) WITHIN GROUP (ORDER BY (pop_est_2019::numeric / area_land::numeric)) 
+        AS median_population_density
+        FROM us_counties_pop_est_2019;
+        -- 3rd quartile: 0.000045771
+        select
+        (pop_est_2019::numeric / area_land::numeric) as county_density,
+        state_name,
+        county_name,
+        ABS(((pop_est_2019 ::numeric / area_land::numeric) - 0.0000457714013667)) as difference
+        -- Difference from the county's population density and the national 1st quartile density
+        from us_counties_pop_est_2019
+        order by difference asc;

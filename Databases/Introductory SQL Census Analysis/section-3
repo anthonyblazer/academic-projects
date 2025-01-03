@@ -1,0 +1,159 @@
+Find the county whose population most matches the national average in 2019.  Repeat with population 
+density.Now do the same for 2000.
+
+    Creating Another Table
+
+    Note: I created a third table that's exactly like us_counties_2000 but instead I changed the name of Shannon County to its current name, Oglala Lakota County. This allowed it to be included in the calculations, unlike the ones you'll see in WHERE's.
+
+    --Created new table (same syntax as us_counties_2000) ; ommited for brevity
+    --New table: us_counties_pop_est_2019
+
+        UPDATE us_counties_2000_question_3
+        SET geo_name = 'Oglalala Lakota County, South Dakota'
+        WHERE state_fips = '46' and county_fips = '113';
+        UPDATE us_counties_2000_question_3
+        SET county_fips = '102'
+        WHERE state_fips = '46' and county_fips = '113';
+
+
+    ___________________________________________________________________
+
+
+    Population average 2019
+
+    According to the following query, the national average from 2019 was 104,468.3396 people. Additionally, the county closest to this average, thus most matches the national average is Platte County, Missouri with a population of 104,418, just 50.3396 citizens away from the national average.
+
+
+
+        -- Calculate the national average population for 2019
+        SELECT AVG(pop_est_2019) AS avg_population_2019
+        FROM us_counties_pop_est_2019;
+        --National average: 104,468.3396
+
+        -- Find the county closest to the national average population in 2019
+        SELECT
+        county_name, --Getting county name
+        state_name, --Getting state name
+        pop_est_2019, -- Seeing the county's population
+        ABS(pop_est_2019 - avg_population.avg_population_2019) AS diff_from_avg
+        --determines the difference between the national average and the county's population
+        FROM
+        us_counties_pop_est_2019,
+        (SELECT AVG(pop_est_2019) AS avg_population_2019 FROM us_counties_pop_est_2019) AS avg_population
+        -- Using another select statement to create a new column called avg_population that does the same as the
+        -- the above query
+        ORDER BY
+        diff_from_avg
+        LIMIT 1; -- Shows the top result
+
+
+
+
+    __________________________________________________________________
+
+    Population Density 2019
+
+    In 2019, the national average density was 0.000358711. Though quite small, this is largely due to many counties having a large amount of land but very few residents. Ultimately, the county with the population density closest to the national average density was Tioga County, New York by a difference of 0.0000000158.
+
+
+        --Population Density of 2019
+        -- Calculate the national average population density for 2019
+        SELECT
+        SUM(pop_est_2019::numeric) / SUM(area_land::numeric) AS avg_density_2019
+        FROM
+        us_counties_pop_est_2019;
+        --National average density: 0.0000358711
+
+
+        --Calculating differences between county densities and the national average density
+        SELECT
+        state_fips,
+        county_fips,
+        state_name,
+        county_name,
+        pop_est_2019, --Population, added in order to see the disparity
+        area_land, -- Land, also adeed to see the disparity as well as the size of the land in the county
+        ROUND((pop_est_2019::numeric / area_land::numeric), 11) AS density_2019,--Calculating the population density in
+        --each county, as well as casting the result to numeric so the small results aren't rounded to integer 0.
+        ABS((pop_est_2019::numeric / area_land::numeric) - (--each county's population density
+        SELECT SUM(pop_est_2019) / SUM(area_land) --national population density average
+        FROM us_counties_pop_est_2019
+        )) AS diff_from_avg -- pairing each county with their absolute difference from the national density
+        FROM
+        us_counties_pop_est_2019
+        ORDER BY
+        diff_from_avg asc -- order from the smallest difference to the largest difference
+        LIMIT 1; -- The top row of the table will be the one closest to the mationa average density
+
+
+
+
+
+    __________________________________________________________________
+
+
+
+    Population Average 2000
+
+    From the following query, the national average is 89,596.277 people. The county closest to the national average is Indiana County, PA with a population of 89,605, meaning they had a difference of only 8.72 people.
+
+
+        -- Calculate the national average population for 2000
+        SELECT AVG(p0010001) AS avg_population_2000
+        FROM us_counties_2000;
+        -- 89,596.277
+
+
+        -- Find the county closest to the national average population in 2000
+        SELECT
+        geo_name AS county_name,
+        state_us_abbreviation AS state_name,
+        p0010001 AS population_2000,
+        ABS(p0010001 - avg_population.avg_population_2000) AS diff_from_avg
+        FROM
+        us_counties_2000,
+        (SELECT AVG(p0010001) AS avg_population_2000 FROM us_counties_2000) AS avg_population
+        --Use a select statement to find the difference between the national average and the county's population
+        ORDER BY
+        diff_from_avg
+        LIMIT 1;--get the top result, which is the smallest difference
+
+
+
+
+
+    _______________________________________________________________
+
+    Population Density 2000
+
+    For the 2000 census, I had to address missing data that only affected this particular calculation. The county land area is not available in the 2000 census table, so a join would be required to get the information from the 2019 census. thus, the final national density was 0.000310743. When compared to the population densities of each county, the  closest to the national average density was Crisp County, Georgia, which had a density of 0.0000311454, with a difference from the average density of 0.0000000711.
+
+        -- Calculate the national population density for the year 2000
+        SELECT
+        ROUND(SUM(c.p0010001)::numeric / SUM(e.area_land)::numeric,13) AS national_density
+        FROM us_counties_2000_question_3 c
+        JOIN us_counties_pop_est_2019 e
+        ON c.state_fips = e.state_fips AND c.county_fips = e.county_fips
+        WHERE e.county_name NOT IN (
+        'Hoonah-Angoon', 'Skagway Municipality', 'Petersburg Borough',
+        'Prince of Wales-Hyder', 'Wrangell City and Borough',
+        'Broomfield County'
+        );
+        --National Density: 0.000310743
+
+
+        -- Calculate each county's density
+        SELECT
+        c.geo_name,
+        c.p0010001::numeric / e.area_land::numeric AS county_density,
+        ABS(((c.p0010001::numeric / e.area_land::numeric)-0.0000310743)) AS distance
+        FROM us_counties_2000_question_3 c
+        JOIN us_counties_pop_est_2019 e
+        ON c.state_fips = e.state_fips AND c.county_fips = e.county_fips
+        WHERE e.county_name NOT IN (
+        'Hoonah-Angoon', 'Skagway Municipality', 'Petersburg Borough',
+        'Prince of Wales-Hyder', 'Wrangell City and Borough',
+        'Broomfield County'
+        )
+        order by
+        distance asc;
