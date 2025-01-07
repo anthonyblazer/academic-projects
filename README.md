@@ -9,4 +9,4 @@ This repository is a collection of assignments, final projects, labs, and resour
 
 
 ### Databases
-1. Census Analysis: PsogreSQL query assignment
+1. Census Analysis: PostgreSQL query assignment

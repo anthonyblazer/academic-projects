@@ -8,6 +8,7 @@ Every section's answers use PostgreSQL. Additionally, the uniquenss of this assi
 
 ## Specifications
 **Languages:** PostgreSQL  
+**Data Model:** Relational
 **Resources:**  
 2019: https://github.com/anthonydb/practical-sql-2/tree/main/Chapter_05  
 2000: https://github.com/anthonydb/practical-sql/tree/main/Chapter_06  
