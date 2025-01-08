@@ -1,5 +1,6 @@
 # GQL 2024 Graph Based Assignment
 
+
 **Background:** GQL 2024, a.k.a Graph Query Language, is a query language for property graphs and was standardized in April 2024 by the ISO/IEC JTC 1. GQL, along with other popularized graph querying langauges, is a NoSQL language, meaning that it does not follow a strict structure, allowing for intricate relationships and queries.
 **Name:** GQL Graph Based Assignment
 **Description:** This assignment is a implmentation of a Graph-based model in GQL 2024. 
