@@ -10,3 +10,11 @@ This repository is a collection of assignments, final projects, labs, and resour
 
 ### Databases
 1. Census Analysis: PostgreSQL query assignment
+2. GQL 2024 Graph Model: GQL Graph-Based Application
+
+
+### Algorithms
+1. MaxHeap: Java implementation of the MaxHeap algorithms
+2. Order Statistic Tree: Java implementation of the Binary Search Tree with statistic queries
+3. RAM Sorting and QuickSelect: Java implementation of a randomized Quickselect algorithm
+4. BFSDFS: Java implementation of Breath First and Depth First Search alogrithms
